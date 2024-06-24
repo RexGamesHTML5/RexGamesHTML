@@ -1,2 +1,1 @@
-# RexGamesHTML
-Simulator Games
+Follow The Game Rules
