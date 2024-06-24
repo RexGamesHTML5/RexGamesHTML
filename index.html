@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Weight Sim</title>
+    <link rel="icon" href="favicon.png" type="image/x-icon">
+    <style>
+        body {
+            background-color: orange;
+        }
+
+        h1 {
+            background-color: gray;
+            padding: 20px;
+            border-radius: 20px;
+            font-size: 45px;
+        }
+
+        span {
+            font-weight: bold;
+        }
+
+        #progress1 {
+            width: 0;
+            height: 100%;
+            background-color: lime;
+            font-size: 20px;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            font-weight: bold;
+        }
+
+        #progress-bar1 {
+            width: 200px;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+
+        #progress2 {
+            width: 0;
+            height: 100%;
+            background-color: red;
+            font-size: 20px;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            font-weight: bold;
+        }
+
+        #progress-bar2 {
+            width: 200px;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: gray;
+            padding: 20px;
+            border-radius: 20px;
+            z-index: 1000;
+        }
+
+        .scrollable {
+            max-height: 15vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cusor: pointer;
+        }
+
+        .audio-player {
+            max-width: 300px;
+            margin: auto;
+            text-align: center;
+        }
+
+        .controls {
+            margin: 10px 0;
+        }
+
+        .time-display {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+
+<body>
+    <center>
+        <div id="displayContainer">
+            <h2 id="hiddenErrorText"></h2>
+            <h1>Strength: <span id="strDIS">???</span></h1>
+            <h1 id="strengthKG"></h1>
+        </div>
+        <div id="progress-bar1">
+            <span>Energy</span>
+            <div id="progress1"></div>
+        </div>
+        <br>
+        <div id="progress-bar2">
+            <span>Pump</span>
+            <div id="progress2"></div>
+        </div>
+        <br>
+        <button id="disable1" onclick="gain(gainAmount)" disabled>Gain +<span id="gainDIS">1</span></button>
+        <br><br>
+        <button onclick="openG()">Open Gym</button>
+        <div id="shopPopup" class="popup">
+            <h2>Gym</h2>
+            <div class="scrollable">
+                <button id="disable2" onclick="gainE(gainEAmount)" disabled>Energy +<span id="gainEDIS">1</span></button>
+                <br><br>
+                <button id="disable3" onclick="buyE1()" disabled>Energy +25</button>
+                <br>
+                <span>Cost: <span id="buyCost1">???</span></span>
+                <br><br>
+                <button id="disable4" onclick="buyE2()" disabled>Energy +75</button>
+                <br>
+                <span>Cost: <span id="buyCost2">???</span></span>
+                <br><br>
+                <button id="disable5" onclick="buyE3()" disabled>Energy +100</button>
+                <br>
+                <span>Cost: <span id="buyCost3">???</span></span>
+                <br><br>
+                <button id="disable6" onclick="buyE4()" disabled>Energy +175</button>
+                <br>
+                <span>Cost: <span id="buyCost4">???</span></span>
+                <br><br>
+                <button id="disable7" onclick="buyE5()" disabled>Energy +250</button>
+                <br>
+                <span>Cost: <span id="buyCost5">???</span></span>
+                <br><br>
+                <button id="disable8" onclick="buyE6()" disabled>Energy +500</button>
+                <br>
+                <span>Cost: <span id="buyCost6">???</span></span>
+                <br><br>
+                <button id="disable9" onclick="buyE7()" disabled>Energy +750</button>
+                <br>
+                <span>Cost: <span id="buyCost7">???</span></span>
+            </div>
+            <h2>Gym Shop</h2>
+            <div class="scrollable">
+                <button id="shopdisable1" onclick="buy15Weights()" disabled>Buy 15kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost1">???</span></span>
+                <br><br>
+                <button id="shopdisable2" onclick="buy35Weights()" disabled>Buy 35kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost2">???</span></span>
+                <br><br>
+                <button id="shopdisable3" onclick="buy65Weights()" disabled>Buy 65kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost3">???</span></span>
+                <br><br>
+                <button id="shopdisable4" onclick="buy125Weights()" disabled>Buy 125kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost4">???</span></span>
+                <br><br>
+                <button id="shopdisable5" onclick="buy250Weights()" disabled>Buy 250kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost5">???</span></span>
+                <br><br>
+                <button id="shopdisable6" onclick="buy500Weights()" disabled>Buy 500kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost6">???</span></span>
+                <br><br>
+                <button id="shopdisable7" onclick="buy2500Weights()" disabled>Buy 2500kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost7">???</span></span>
+                <br><br>
+                <button id="shopdisable8" onclick="buy7500Weights()" disabled>Buy 7500kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost8">???</span></span>
+                <br><br>
+                <button id="shopdisable9" onclick="buy12500Weights()" disabled>Buy 12500kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost9">???</span></span>
+                <br><br>
+                <button id="shopdisable10" onclick="buy25000Weights()" disabled>Buy 25000kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost10">???</span></span>
+                <br><br>
+                <button id="shopdisable11" onclick="buy45000Weights()" disabled>Buy 45000kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost11">???</span></span>
+                <br><br>
+                <button id="shopdisable12" onclick="buy75000Weights()" disabled>Buy 75000kg Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost12">???</span></span>
+                <br><br>
+                <button id="shopdisable13" onclick="buy1TWeights()" disabled>Buy 1Ton Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost13">???</span></span>
+                <br><br>
+                <button id="shopdisable14" onclick="buy15TWeights()" disabled>Buy 15Ton Weight</button>
+                <br>
+                <span>Cost: <span id="shopCost14">???</span></span>
+            </div>
+            <br>
+            <span class="close" onclick="closeG()">&times;</span>
+        </div>
+        <br><br>
+        <button onclick="openS()">Open Shop</button>
+        <div id="shopPopup2" class="popup">
+            <h2>Shop</h2>
+            <span>coming soon!</span>
+            <br>
+            <span class="close" onclick="closeS()">&times;</span>
+        </div>
+        <br><br>
+        <button onclick="openLD()">Open Leaderboard</button>
+        <div id="leaderboardPopup" class="popup">
+            <h2>Leaderboard Weights</h2>
+            <div class="score-board">
+                <span>Top Weights: <span id="highScoreKGs">0</span></span>
+            </div>
+            <br>
+            <span>coming soon!</span>
+            <br>
+            <span class="close" onclick="closeLD()">&times;</span>
+        </div>
+        <br><br>
+        <button onclick="openSettings()">⚙️Settings⚙️</button>
+        <br><br>
+        <div id="settingsPopup" class="popup">
+            <h2>Settings</h2>
+            <div class="scrollable">
+                <button onclick="saveGame()">Save Game</button>
+                <br><br>
+                <button onclick="loadGame()">Load Game</button>
+            </div>
+            <h2>Music Player</h2>
+            <div class="audio-player">
+                <audio id="audio" preload="auto">
+                    <source id="audio-source" src="Tobu - Nostalgia.mp3" type="audio/mpeg">
+                </audio>
+                <button id="play">Play</button>
+                <button id="next">Next</button>
+                <button id="pause">Pause</button>
+                <button id="stop">Stop</button>
+                <button id="loop-btn">Loop: Off</button>
+                <br><br>
+                <span>Volume</span>
+                <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
+            </div>
+            <div class="time-display">
+                <span id="currentTime">00:00</span> / <span id="duration">00:00</span>
+            </div>
+            <span class="close" onclick="closeSettings()">&times;</span>
+        </div>
+        </div>
+    </center>
+    <script>
+        let gainAmount = 1;
+        let gainEAmount = 1;
+        let strength = 0;
+
+        const strElement = document.getElementById("strDIS");
+        const gainElement = document.getElementById("gainDIS");
+        const gainEElement = document.getElementById("gainEDIS");
+        const hiddenErrorText = document.getElementById("hiddenErrorText");
+
+        setInterval(() => {
+            strElement.textContent = updateSuffixesCurrency(strength);
+            gainElement.textContent = updateSuffixesCurrency(gainAmount + weights);
+            gainEElement.textContent = updateSuffixesCurrency(gainEAmount);
+            hiddenErrorText.textContent = kgDisplay.value;
+        }, 1);
+
+        const shopCost1 = document.getElementById("shopCost1");
+        const shopCost2 = document.getElementById("shopCost2");
+        const shopCost3 = document.getElementById("shopCost3");
+        const shopCost4 = document.getElementById("shopCost4");
+        const shopCost5 = document.getElementById("shopCost5");
+        const shopCost6 = document.getElementById("shopCost6");
+        const shopCost7 = document.getElementById("shopCost7");
+        const shopCost8 = document.getElementById("shopCost8");
+        const shopCost9 = document.getElementById("shopCost9");
+        const shopCost10 = document.getElementById("shopCost10");
+        const shopCost11 = document.getElementById("shopCost11");
+        const shopCost12 = document.getElementById("shopCost12");
+        const shopCost13 = document.getElementById("shopCost13");
+        const shopCost14 = document.getElementById("shopCost14");
+        const buyCost1 = document.getElementById("buyCost1");
+        const buyCost2 = document.getElementById("buyCost2");
+        const buyCost3 = document.getElementById("buyCost3");
+        const buyCost4 = document.getElementById("buyCost4");
+        const buyCost5 = document.getElementById("buyCost5");
+        const buyCost6 = document.getElementById("buyCost6");
+        const buyCost7 = document.getElementById("buyCost7");
+        setInterval(() => {
+            shopCost1.textContent = updateSuffixesCurrency(strengthCostHidden1);
+            shopCost2.textContent = updateSuffixesCurrency(strengthCostHidden2);
+            shopCost3.textContent = updateSuffixesCurrency(strengthCostHidden3);
+            shopCost4.textContent = updateSuffixesCurrency(strengthCostHidden4);
+            shopCost5.textContent = updateSuffixesCurrency(strengthCostHidden5);
+            shopCost6.textContent = updateSuffixesCurrency(strengthCostHidden6);
+            shopCost7.textContent = updateSuffixesCurrency(strengthCostHidden7);
+            shopCost8.textContent = updateSuffixesCurrency(strengthCostHidden8);
+            shopCost9.textContent = updateSuffixesCurrency(strengthCostHidden9);
+            shopCost10.textContent = updateSuffixesCurrency(strengthCostHidden10);
+            shopCost11.textContent = updateSuffixesCurrency(strengthCostHidden11);
+            shopCost12.textContent = updateSuffixesCurrency(strengthCostHidden12);
+            shopCost13.textContent = updateSuffixesCurrency(strengthCostHidden13);
+            shopCost14.textContent = updateSuffixesCurrency(strengthCostHidden14);
+            buyCost1.textContent = updateSuffixesCurrency(energyCost1);
+            buyCost2.textContent = updateSuffixesCurrency(energyCost2);
+            buyCost3.textContent = updateSuffixesCurrency(energyCost3);
+            buyCost4.textContent = updateSuffixesCurrency(energyCost4);
+            buyCost5.textContent = updateSuffixesCurrency(energyCost5);
+            buyCost6.textContent = updateSuffixesCurrency(energyCost6);
+            buyCost7.textContent = updateSuffixesCurrency(energyCost7);
+        }, 1);
+
+        const kgDisplay = document.getElementById("strengthKG");
+        let highScoreKGs = localStorage.getItem('highScoreKGs') || 0;
+        document.getElementById('highScoreKGs').innerText = formatKg(highScoreKGs);
+        setInterval(() => {
+            const kilograms = Math.floor((strength * 0.453592).toFixed(2));
+            kgDisplay.textContent = formatKg(kilograms);
+            if (kilograms > highScoreKGs) {
+                highScoreKGs = kilograms;
+                document.getElementById('highScoreKGs').innerText = formatKg(highScoreKGs);
+                localStorage.setItem('highScoreKGs', formatKg(highScoreKGs));
+            }
+        }, 1);
+        // Cooldown Gain Button
+        let cdTime = 1000;
+        let isCooldown = false;
+        let noneEnergy = false;
+
+        function gain(amount) {
+            if (!isCooldown) {
+                isCooldown = true;
+                energy -= amount + (weightsKGs / 2) + weightsKGs * 0.2;
+                pump += 1;
+                if (energy > lowEnergy) {
+                    if (pump > maxPump - 1) {
+                        alert("Your pump is ready!");
+                        cdTime = 500;
+                        isMaxPump = true;
+                    }
+                    strength += amount + weights;
+                    setTimeout(() => {
+                        isCooldown = false;
+                    }, cdTime);
+                } else {
+                    alert("Not Enough Energy!");
+                    strength += amount + weights;
+                    noneEnergy = true;
+                    document.getElementById("disable2").disabled = false;
+                }
+            }
+        }
+
+
+        function gainE(amount) {
+            if (noneEnergy) {
+                energy += amount;
+                if (energy > maxEnergy - 1) {
+                    document.getElementById("disable2").disabled = true;
+                    noneEnergy = false;
+                    isCooldown = false;
+                }
+            } else {
+                alert("You have alot of energy!");
+            }
+        }
+        let energy1Enable = 100000;
+        let energy2Enable = 100000000;
+        let energy3Enable = 500000000;
+        let energy4Enable = 750000000;
+        let energy5Enable = 1000000000;
+        let energy6Enable = 5000000000;
+        setInterval(() => {
+            if (energy <= 0) {
+                energy = 0;
+                document.getElementById("disable1").disabled = true;
+            }
+            if (strength > energy1Enable - 1) {
+                gainEAmount = 5;
+            } else {
+                gainEAmount = 1;
+            }
+            if (strength > energy2Enable - 1) {
+                gainEAmount = 75;
+            }
+            if (strength > energy3Enable - 1) {
+                gainEAmount = 100;
+            }
+            if (strength > energy4Enable - 1) {
+                gainEAmount = 175;
+            }
+            if (strength > energy5Enable - 1) {
+                gainEAmount = 250;
+            }
+            if (strength > energy6Enable - 1) {
+                gainEAmount = 500;
+            }
+        }, 1);
+
+
+        let energy = 100;
+        let maxEnergy = 100;
+        let lowEnergy = 0;
+        let energyCost1 = 1000;
+        let energyCost2 = 75000;
+        let energyCost3 = 100000;
+        let energyCost4 = 500000;
+        let energyCost5 = 1000000;
+        let energyCost6 = 2500000;
+        let energyCost7 = 7500000;
+        const energyBar = document.getElementById("progress1");
+
+        function updateEnergyBar() {
+            const progress1 = (energy / maxEnergy) * 100;
+            energyBar.style.width = progress1 + "%";
+            energyBar.textContent = Math.floor(progress1) + "%";
+        }
+        setInterval(() => {
+            updateEnergyBar();
+            if (energy > maxEnergy - 1) {
+                maxEnergy = energy;
+                document.getElementById("disable1").disabled = false;
+            }
+        }, 1);
+
+        function buyE1() {
+            if (strength > energyCost1 - 1) {
+                strength -= energyCost1;
+                energy += 25;
+            }
+        }
+
+        function buyE2() {
+            if (strength > energyCost2 - 1) {
+                strength -= energyCost2;
+                energy += 75;
+            }
+        }
+
+        function buyE3() {
+            if (strength > energyCost3 - 1) {
+                strength -= energyCost3;
+                energy += 100;
+            }
+        }
+
+        function buyE4() {
+            if (strength > energyCost4 - 1) {
+                strength -= energyCost4;
+                energy += 175;
+            }
+        }
+
+        function buyE5() {
+            if (strength > energyCost5 - 1) {
+                strength -= energyCost5;
+                energy += 250;
+            }
+        }
+
+        function buyE6() {
+            if (strength > energyCost6 - 1) {
+                strength -= energyCost6;
+                energy += 500;
+            }
+        }
+
+        function buyE7() {
+            if (strength > energyCost7 - 1) {
+                strength -= energyCost7;
+                energy += 750;
+            }
+        }
+        setInterval(() => {
+            if (strength > energyCost1 - 1) {
+                document.getElementById("disable3").disabled = false;
+
+            } else {
+                document.getElementById("disable3").disabled = true;
+            }
+            if (strength > energyCost2 - 1) {
+                document.getElementById("disable4").disabled = false;
+
+            } else {
+                document.getElementById("disable4").disabled = true;
+            }
+            if (strength > energyCost3 - 1) {
+                document.getElementById("disable5").disabled = false;
+
+            } else {
+                document.getElementById("disable5").disabled = true;
+            }
+            if (strength > energyCost4 - 1) {
+                document.getElementById("disable6").disabled = false;
+
+            } else {
+                document.getElementById("disable6").disabled = true;
+            }
+            if (strength > energyCost5 - 1) {
+                document.getElementById("disable7").disabled = false;
+
+            } else {
+                document.getElementById("disable7").disabled = true;
+            }
+            if (strength > energyCost6 - 1) {
+                document.getElementById("disable8").disabled = false;
+
+            } else {
+                document.getElementById("disable8").disabled = true;
+            }
+            if (strength > energyCost7 - 1) {
+                document.getElementById("disable9").disabled = false;
+
+            } else {
+                document.getElementById("disable9").disabled = true;
+            }
+        }, 1)
+
+        let pump = 0;
+        let maxPump = 100;
+        let isMaxPump = false;
+        const pumpBar = document.getElementById("progress2");
+
+        function updatePumpBar() {
+            const progress2 = (pump / maxPump) * 100;
+            pumpBar.style.width = progress2 + "%";
+            pumpBar.textContent = Math.floor(progress2) + "%";
+        }
+        setInterval(() => {
+            updatePumpBar();
+            if (pump > maxPump - 1) {
+                maxPump = pump;
+            }
+        }, 1);
+
+        setInterval(() => {
+            if (isMaxPump) {
+                pump--;
+                energy += 0.1;
+                isMaxPump = true;
+            }
+            if (pump < 0) {
+                pump = 0;
+                cdTime = 1000;
+                isMaxPump = false;
+            }
+        }, 100);
+
+        setInterval(() => {
+            if (strength > strengthCostHidden1 - 1) {
+                document.getElementById("shopdisable1").disabled = false;
+            } else {
+                document.getElementById("shopdisable1").disabled = true;
+            }
+            if (strength > strengthCostHidden2 - 1) {
+                document.getElementById("shopdisable2").disabled = false;
+            } else {
+                document.getElementById("shopdisable2").disabled = true;
+            }
+            if (strength > strengthCostHidden3 - 1) {
+                document.getElementById("shopdisable3").disabled = false;
+            } else {
+                document.getElementById("shopdisable3").disabled = true;
+            }
+            if (strength > strengthCostHidden4 - 1) {
+                document.getElementById("shopdisable4").disabled = false;
+            } else {
+                document.getElementById("shopdisable4").disabled = true;
+            }
+            if (strength > strengthCostHidden5 - 1) {
+                document.getElementById("shopdisable5").disabled = false;
+            } else {
+                document.getElementById("shopdisable5").disabled = true;
+            }
+            if (strength > strengthCostHidden6 - 1) {
+                document.getElementById("shopdisable6").disabled = false;
+            } else {
+                document.getElementById("shopdisable6").disabled = true;
+            }
+            if (strength > strengthCostHidden7 - 1) {
+                document.getElementById("shopdisable7").disabled = false;
+            } else {
+                document.getElementById("shopdisable7").disabled = true;
+            }
+            if (strength > strengthCostHidden8 - 1) {
+                document.getElementById("shopdisable8").disabled = false;
+            } else {
+                document.getElementById("shopdisable8").disabled = true;
+            }
+            if (strength > strengthCostHidden9 - 1) {
+                document.getElementById("shopdisable9").disabled = false;
+            } else {
+                document.getElementById("shopdisable9").disabled = true;
+            }
+            if (strength > strengthCostHidden10 - 1) {
+                document.getElementById("shopdisable10").disabled = false;
+            } else {
+                document.getElementById("shopdisable10").disabled = true;
+            }
+            if (strength > strengthCostHidden11 - 1) {
+                document.getElementById("shopdisable11").disabled = false;
+            } else {
+                document.getElementById("shopdisable11").disabled = true;
+            }
+            if (strength > strengthCostHidden12 - 1) {
+                document.getElementById("shopdisable12").disabled = false;
+            } else {
+                document.getElementById("shopdisable12").disabled = true;
+            }
+            if (strength > strengthCostHidden13 - 1) {
+                document.getElementById("shopdisable13").disabled = false;
+            } else {
+                document.getElementById("shopdisable13").disabled = true;
+            }
+            if (strength > strengthCostHidden14 - 1) {
+                document.getElementById("shopdisable14").disabled = false;
+            } else {
+                document.getElementById("shopdisable14").disabled = true;
+            }
+        }, 1);
+
+        let weights = 0;
+        let weightsKGs = 0;
+        let strengthCostHidden1 = 35;
+        let strengthCostHidden2 = 200;
+        let strengthCostHidden3 = 500;
+        let strengthCostHidden4 = 2500;
+        let strengthCostHidden5 = 5000;
+        let strengthCostHidden6 = 7500;
+        let strengthCostHidden7 = 17500;
+        let strengthCostHidden8 = 20000;
+        let strengthCostHidden9 = 50000;
+        let strengthCostHidden10 = 75000;
+        let strengthCostHidden11 = 125000;
+        let strengthCostHidden12 = 250000;
+        let strengthCostHidden13 = 750000;
+        let strengthCostHidden14 = 1000000;
+
+        function buy15Weights() {
+            if (strength > strengthCostHidden1 - 1) {
+                strength -= strengthCostHidden1;
+                weights += 1;
+                weightsKGs = 15;
+            }
+        }
+
+        function buy35Weights() {
+            if (strength > strengthCostHidden2 - 1) {
+                strength -= strengthCostHidden2;
+                weights += 2;
+                weightsKGs = 35;
+            }
+        }
+
+        function buy65Weights() {
+            if (strength > strengthCostHidden3 - 1) {
+                strength -= strengthCostHidden3;
+                weights += 5;
+                weightsKGs = 65;
+            }
+        }
+
+        function buy125Weights() {
+            if (strength > strengthCostHidden4 - 1) {
+                strength -= strengthCostHidden4;
+                weights += 25;
+                weightsKGs = 125;
+            }
+        }
+
+        function buy250Weights() {
+            if (strength > strengthCostHidden5 - 1) {
+                strength -= strengthCostHidden5;
+                weights += 75;
+                weightsKGs = 250;
+            }
+        }
+
+        function buy500Weights() {
+            if (strength > strengthCostHidden6 - 1) {
+                strength -= strengthCostHidden6;
+                weights += 100;
+                weightsKGs = 500;
+            }
+        }
+
+        function buy2500Weights() {
+            if (strength > strengthCostHidden7 - 1) {
+                strength -= strengthCostHidden7;
+                weights += 150;
+                weightsKGs = 2500;
+            }
+        }
+
+        function buy7500Weights() {
+            if (strength > strengthCostHidden8 - 1) {
+                strength -= strengthCostHidden8;
+                weights += 175;
+                weightsKGs = 7500;
+            }
+        }
+
+        function buy12500Weights() {
+            if (strength > strengthCostHidden9 - 1) {
+                strength -= strengthCostHidden9;
+                weights += 250;
+                weightsKGs = 12500;
+            }
+        }
+
+        function buy25000Weights() {
+            if (strength > strengthCostHidden10 - 1) {
+                strength -= strengthCostHidden10;
+                weights += 300;
+                weightsKGs = 25000;
+            }
+        }
+
+        function buy45000Weights() {
+            if (strength > strengthCostHidden11 - 1) {
+                strength -= strengthCostHidden11;
+                weights += 400;
+                weightsKGs = 45000;
+            }
+        }
+
+        function buy75000Weights() {
+            if (strength > strengthCostHidden12 - 1) {
+                strength -= strengthCostHidden12;
+                weights += 500;
+                weightsKGs = 75000;
+            }
+        }
+
+        function buy1TWeights() {
+            if (strength > strengthCostHidden13 - 1) {
+                strength -= strengthCostHidden13;
+                weights += 1000;
+                weightsKGs = 125000;
+            }
+        }
+
+        function buy15TWeights() {
+            if (strength > strengthCostHidden14 - 1) {
+                strength -= strengthCostHidden14;
+                weights += 1500;
+                weightsKGs = 150000;
+            }
+        }
+
+        function updateSuffixesCurrency(amount) {
+            const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td"];
+            let tier = Math.log10(amount) / 3 | 0;
+            if (tier == 0) return amount;
+            let suffix = suffixes[tier];
+            let scale = Math.pow(10, tier * 3);
+            let scaled = amount / scale;
+            return scaled.toFixed(2) + suffix;
+        }
+
+        function formatKg(amountKg) {
+            const suffixesKg = ["Kg", "Ton", "Kt", "Mt", "Gt", "Trt", "Pt", "Et", "Zt", "Yt", "Nt", "Tnt", "Tkt"];
+            let suffixIndexKg = 0;
+
+            while (amountKg >= 100000 && suffixIndexKg < suffixesKg.length - 1) {
+                amountKg /= 100000;
+                suffixIndexKg++;
+            }
+
+            return Math.floor(amountKg) + suffixesKg[suffixIndexKg];
+        }
+
+        function openG() {
+            let shopPopup = document.getElementById("shopPopup");
+            shopPopup.style.display = "block";
+        }
+
+        function closeG() {
+            let shopPopup = document.getElementById("shopPopup");
+            shopPopup.style.display = "none";
+        }
+
+        function openS() {
+            let shopPopup2 = document.getElementById("shopPopup2");
+            shopPopup2.style.display = "block";
+        }
+
+        function closeS() {
+            let shopPopup2 = document.getElementById("shopPopup2");
+            shopPopup2.style.display = "none";
+        }
+
+        function openLD() {
+            let leadboardPopup = document.getElementById("leaderboardPopup");
+            leaderboardPopup.style.display = "block";
+        }
+
+        function closeLD() {
+            let leaderboardPopup = document.getElementById("leaderboardPopup");
+            leaderboardPopup.style.display = "none";
+        }
+
+        function openSettings() {
+            let settingsPopup = document.getElementById("settingsPopup");
+            settingsPopup.style.display = "block";
+        }
+
+        function closeSettings() {
+            let settingsPopup = document.getElementById("settingsPopup");
+            settingsPopup.style.display = "none";
+        }
+
+        window.addEventListener('beforeunload', saveGame);
+
+        window.addEventListener('beforeunload', function(e) {
+            var confirmationMessage = 'You have unsaved changes. Are you sure you want to leave?';
+
+
+            (e || window.event).returnValue = confirmationMessage;
+            return confirmationMessage;
+        });
+
+        function saveGame() {
+            const gameState = {
+                strength: strength,
+                gainAmount: gainAmount,
+                gainEAmount: gainEAmount,
+                weights: weights,
+                weightsKGs: weightsKGs,
+                strengthCostHidden1: strengthCostHidden1,
+                strengthCostHidden2: strengthCostHidden2,
+                strengthCostHidden3: strengthCostHidden3,
+                strengthCostHidden4: strengthCostHidden4,
+                strengthCostHidden5: strengthCostHidden5,
+                strengthCostHidden6: strengthCostHidden6,
+                strengthCostHidden7: strengthCostHidden7,
+                strengthCostHidden8: strengthCostHidden8,
+                strengthCostHidden9: strengthCostHidden9,
+                strengthCostHidden10: strengthCostHidden10,
+                strengthCostHidden11: strengthCostHidden11,
+                strengthCostHidden12: strengthCostHidden12,
+                strengthCostHidden13: strengthCostHidden13,
+                strengthCostHidden14: strengthCostHidden14,
+                cdTime: cdTime,
+                pump: pump,
+                maxPump: maxPump,
+                isMaxPump: isMaxPump,
+                isCooldown: isCooldown,
+                noneEnergy: noneEnergy,
+                energy: energy,
+                lowEnergy: lowEnergy,
+            };
+            alert("Game Saved!");
+            localStorage.setItem('gameState', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const savedState = localStorage.getItem('gameState');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                strength = gameState.strength;
+                gainAmount = gameState.gainAmount;
+                gainEAmount = gameState.gainEAmount;
+                weights = gameState.weights;
+                weightsKGs = gameState.weightsKGs;
+                strengthCostHidden1 = gameState.strengthCostHidden1;
+                strengthCostHidden2 = gameState.strengthCostHidden2;
+                strengthCostHidden3 = gameState.strengthCostHidden3;
+                strengthCostHidden4 = gameState.strengthCostHidden4;
+                strengthCostHidden5 = gameState.strengthCostHidden5;
+                strengthCostHidden6 = gameState.strengthCostHidden6;
+                strengthCostHidden7 = gameState.strengthCostHidden7;
+                strengthCostHidden8 = gameState.strengthCostHidden8;
+                strengthCostHidden9 = gameState.strengthCostHidden9;
+                strengthCostHidden10 = gameState.strengthCostHidden10;
+                strengthCostHidden11 = gameState.strengthCostHidden11;
+                strengthCostHidden12 = gameState.strengthCostHidden12;
+                strengthCostHidden13 = gameState.strengthCostHidden13;
+                strengthCostHidden14 = gameState.strengthCostHidden14;
+                cdTime = gameState.cdTime;
+                pump = gameState.pump;
+                maxPump = gameState.maxPump;
+                isMaxPump = gameState.isMaxPump;
+                isCooldown = gameState.isCooldown;
+                noneEnergy = gameState.nobeEnergy;
+                energy = gameState.energy;
+                lowEnergy = gameState.lowEnergy;
+                alert("Game Loaded!");
+            } else {
+                alert("Game Data Has Not Found!");
+                gameSaved = false;
+            }
+        }
+
+        let isLooping = false;
+        document.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('audio');
+            const playButton = document.getElementById('play');
+            const pauseButton = document.getElementById('pause');
+            const stopButton = document.getElementById('stop');
+            const nextButton = document.getElementById('next');
+            const loopBtn = document.getElementById('loop-btn');
+            const volumeControl = document.getElementById('volume');
+            const currentTimeDisplay = document.getElementById('currentTime');
+            const durationDisplay = document.getElementById('duration');
+
+            let currentAudioIndex = 0;
+            let audioFiles = [
+                'Sunrise Workout.mp3',
+                'Jim Yosef - Eclipse.mp3',
+                'JPB - High.mp3',
+                'Jim Yosef - Link.mp3',
+                'Jim Yosef - Arrow.mp3',
+                'Jim Yosef - Firefly.mp3',
+            ];
+
+            playButton.addEventListener('click', () => {
+                audio.play();
+            });
+
+            nextButton.addEventListener('click', () => {
+                currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
+                loadAudio(currentAudioIndex);
+            });
+
+            pauseButton.addEventListener('click', () => {
+                audio.pause();
+            });
+
+
+            stopButton.addEventListener('click', () => {
+                audio.pause();
+                audio.currentTime = 0;
+            });
+
+            loopBtn.addEventListener('click', () => {
+                isLooping = !isLooping;
+                audio.loop = isLooping;
+                loopBtn.textContent = `Loop: ${isLooping ? 'On' : 'Off'}`;
+            });
+
+            volumeControl.addEventListener('input', () => {
+                audio.volume = volumeControl.value;
+            });
+
+            audio.addEventListener('ended', () => {
+                if (isLooping) {
+                    currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
+                    loadAudio(currentAudioIndex);
+                }
+            });
+
+            audio.addEventListener('timeupdate', () => {
+                currentTimeDisplay.textContent = formatTime(audio.currentTime);
+            });
+
+
+            audio.addEventListener('loadedmetadata', () => {
+                durationDisplay.textContent = formatTime(audio.duration);
+            });
+
+            function loadAudio(index) {
+                audio.src = audioFiles[index];
+                audio.load();
+                audio.play();
+            }
+
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+        });
+    </script>
+
+</body>
+
+
+</html>
